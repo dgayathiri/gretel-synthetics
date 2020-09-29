@@ -5,9 +5,7 @@ import logging
 
 from tensorflow.keras.optimizers import RMSprop  # pylint: disable=import-error
 import tensorflow as tf
-from tensorflow_privacy.privacy.optimizers.dp_optimizer import (
-    make_gaussian_optimizer_class as make_dp_optimizer,
-)
+from tensorflow_privacy.privacy.optimizers.dp_optimizer_keras import make_keras_optimizer_class, DPKerasAdamOptimizer
 from tensorflow_privacy.privacy.analysis import compute_dp_sgd_privacy
 
 from gretel_synthetics.config import BaseConfig
@@ -46,10 +44,9 @@ def _build_sequential_model(
     if store.dp:
         logging.info("Differentially private training enabled")
 
-        rms_prop_optimizer = tf.compat.v1.train.RMSPropOptimizer
-        dp_rms_prop_optimizer = make_dp_optimizer(rms_prop_optimizer)
+        dp_rms_prop_optimizer = make_keras_optimizer_class(RMSprop)
 
-        optimizer = dp_rms_prop_optimizer(
+        optimizer = DPKerasAdamOptimizer(
             l2_norm_clip=store.dp_l2_norm_clip,
             noise_multiplier=store.dp_noise_multiplier,
             num_microbatches=store.dp_microbatches,
