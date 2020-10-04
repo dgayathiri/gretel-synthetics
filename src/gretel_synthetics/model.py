@@ -5,7 +5,7 @@ import logging
 
 from tensorflow.keras.optimizers import RMSprop  # pylint: disable=import-error
 import tensorflow as tf
-from tensorflow_privacy.privacy.optimizers.dp_optimizer_keras import make_keras_optimizer_class, DPKerasAdamOptimizer
+from tensorflow_privacy.privacy.optimizers.dp_optimizer_keras import make_keras_optimizer_class, DPKerasAdamOptimizer, DPKerasSGDOptimizer
 from tensorflow_privacy.privacy.analysis import compute_dp_sgd_privacy
 
 from gretel_synthetics.config import BaseConfig
@@ -42,7 +42,7 @@ def _build_sequential_model(
     )
 
     if store.dp:
-        logging.info("Differentially private training enabled")
+        logging.info(f"Differentially private training enabled with l2_norm_clip={store.dp_l2_norm_clip}, noise_multiplier=f{store.dp_noise_multiplier}, num_microbatches={store.dp_microbatches}, learning_rate={store.dp_learning_rate}")
 
         dp_rms_prop_optimizer = make_keras_optimizer_class(RMSprop)
 
@@ -52,6 +52,7 @@ def _build_sequential_model(
             num_microbatches=store.dp_microbatches,
             learning_rate=store.dp_learning_rate,
         )
+        # optimizer = dp_rms_prop_optimizer
 
         """
         Compute vector of per-example loss rather than its mean over a minibatch.
